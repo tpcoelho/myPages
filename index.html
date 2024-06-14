@@ -5,6 +5,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Cobertura de Testes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+
+        #table-container {
+            margin: 0 auto;
+            max-width: 800px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f9;
+            color: #555;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 
 <body>
@@ -12,37 +59,36 @@
     <div id="table-container">
         <!-- Tabela gerada dinamicamente a partir do JSON -->
     </div>
+    <script>
+        fetch('Reports/moduloName_report.json')
+            .then(response => response.json())
+            .then(data => {
+                const tableContainer = document.getElementById('table-container');
+                const targets = data.Targets;
+
+                // Criar a tabela
+                const table = document.createElement('table');
+                const headerRow = table.insertRow();
+                ['Nome do Target', 'Total de Testes', 'Testes Passados', 'Testes Falhados'].forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+
+                // Preencher a tabela com os dados do JSON
+                targets.forEach(target => {
+                    const row = table.insertRow();
+                    ['targetName', 'totalTest', 'passedTest', 'failedTest'].forEach(key => {
+                        const cell = row.insertCell();
+                        cell.textContent = target[key];
+                    });
+                });
+
+                // Adicionar a tabela ao contêiner
+                tableContainer.appendChild(table);
+            })
+            .catch(error => console.error('Erro ao carregar o JSON:', error));
+    </script>
 </body>
 
 </html>
-
-<script>
-    fetch('Reports/moduloName_report.json')
-        .then(response => response.json())
-        .then(data => {
-            const tableContainer = document.getElementById('table-container');
-            const targets = data.Targets;
-
-            // Criar a tabela
-            const table = document.createElement('table');
-            const headerRow = table.insertRow();
-            ['targetName', 'totalTest', 'passedTest', 'failedTest'].forEach(headerText => {
-                const th = document.createElement('th');
-                th.textContent = headerText;
-                headerRow.appendChild(th);
-            });
-
-            // Preencher a tabela com os dados do JSON
-            targets.forEach(target => {
-                const row = table.insertRow();
-                ['targetName', 'totalTest', 'passedTest', 'failedTest'].forEach(key => {
-                    const cell = row.insertCell();
-                    cell.textContent = target[key];
-                });
-            });
-
-            // Adicionar a tabela ao contêiner
-            tableContainer.appendChild(table);
-        })
-        .catch(error => console.error('Erro ao carregar o JSON:', error));
-</script>
