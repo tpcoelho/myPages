@@ -4,12 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pages Example</title>
+    <title>Relatório de Cobertura de Testes</title>
 </head>
 
 <body>
-    <h1>Welcome alo alo to GitHub Pages!</h1>
-    <p>This is a sample page hosted with GitHub Pages.</p>
+    <h1>Relatório de Cobertura de Testes</h1>
+    <div id="table-container">
+        <!-- Tabela gerada dinamicamente a partir do JSON -->
+    </div>
 </body>
 
 </html>
+
+<script>
+    fetch('Reports/moduloName_report.json')
+        .then(response => response.json())
+        .then(data => {
+            const tableContainer = document.getElementById('table-container');
+            const targets = data.Targets;
+
+            // Criar a tabela
+            const table = document.createElement('table');
+            const headerRow = table.insertRow();
+            ['targetName', 'totalTest', 'passedTest', 'failedTest'].forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            // Preencher a tabela com os dados do JSON
+            targets.forEach(target => {
+                const row = table.insertRow();
+                ['targetName', 'totalTest', 'passedTest', 'failedTest'].forEach(key => {
+                    const cell = row.insertCell();
+                    cell.textContent = target[key];
+                });
+            });
+
+            // Adicionar a tabela ao contêiner
+            tableContainer.appendChild(table);
+        })
+        .catch(error => console.error('Erro ao carregar o JSON:', error));
+</script>
