@@ -1,16 +1,16 @@
 {
-  "coverage": 0.96,
+  "coverage": 0.5032,
   "Targets": [
     {
       "targetName": "EssentialFeedTests",
-      "totalTest": 86,
-      "passedTest": 86,
-      "failedTest": 0
+      "totalTest": 30,
+      "passedTest": 20,
+      "failedTest": 10
     },
     {
       "targetName": "EssentialFeedAPIEndToEndTests",
-      "totalTest": 2,
-      "passedTest": 1,
+      "totalTest": 20,
+      "passedTest": 19,
       "failedTest": 1
     },
     {
