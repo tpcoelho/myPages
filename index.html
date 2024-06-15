@@ -84,8 +84,8 @@
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(text, 'text/html');
             const reportFiles = Array.from(htmlDoc.getElementsByTagName('a'))
-                .map(a => a.href)
-                .filter(href => href.endsWith('_report.json'));
+                                    .map(a => a.href)
+                                    .filter(href => href.endsWith('_report.json'));
 
             for (const reportFile of reportFiles) {
                 try {
