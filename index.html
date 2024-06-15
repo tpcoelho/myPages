@@ -57,7 +57,7 @@
 <body>
     <h1>Relatório de Cobertura de Testes</h1>
     <div id="table-container">
-        <!-- Tabela gerada dinamicamente a partir do JSON -->
+        <!-- Tabela gerada dinamicamente a partir dos JSONs -->
     </div>
     <script>
         // Função para extrair o nome do módulo a partir do nome do arquivo JSON
@@ -65,40 +65,59 @@
             return filename.replace('_report.json', '');
         }
 
-        fetch('Reports/moduloName_report.json')
-            .then(response => response.json())
-            .then(data => {
-                const tableContainer = document.getElementById('table-container');
-                const targets = data.Targets;
+        // Função para carregar e processar todos os arquivos JSON na pasta Reports
+        async function loadAndProcessReports() {
+            const tableContainer = document.getElementById('table-container');
 
-                // Obter informações necessárias do JSON
-                const moduleName = getModuleNameFromFilename('moduloName_report.json'); // Substitua pelo nome real do arquivo JSON
-                const coveragePercentage = (parseFloat(data.coverage) * 100).toFixed(2);
-                const totalTestUnit = targets[0]?.totalTest || 0;
-                const totalTestUI = targets[1]?.totalTest || 0;
-                const totalFailed = (targets[0]?.failedTest || 0) + (targets[1]?.failedTest || 0);
+            // Criar a tabela
+            const table = document.createElement('table');
+            const headerRow = table.insertRow();
+            ['Modulo', 'Coverage', 'Total test Unit', 'Total test UI', 'Total Failed'].forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
 
-                // Criar a tabela
-                const table = document.createElement('table');
-                const headerRow = table.insertRow();
-                ['Modulo', 'Coverage', 'Total test Unit', 'Total test UI', 'Total Failed'].forEach(headerText => {
-                    const th = document.createElement('th');
-                    th.textContent = headerText;
-                    headerRow.appendChild(th);
-                });
+            // Obter lista de arquivos JSON na pasta Reports
+            const response = await fetch('Reports');
+            const text = await response.text();
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(text, 'text/html');
+            const reportFiles = Array.from(htmlDoc.getElementsByTagName('a'))
+                .map(a => a.href)
+                .filter(href => href.endsWith('_report.json'));
 
-                // Preencher a tabela com os dados do JSON
-                const row = table.insertRow();
-                const cellValues = [moduleName, coveragePercentage + '%', totalTestUnit, totalTestUI, totalFailed];
-                cellValues.forEach(value => {
-                    const cell = row.insertCell();
-                    cell.textContent = value;
-                });
+            for (const reportFile of reportFiles) {
+                try {
+                    const response = await fetch(reportFile);
+                    const data = await response.json();
+                    const targets = data.Targets;
 
-                // Adicionar a tabela ao contêiner
-                tableContainer.appendChild(table);
-            })
-            .catch(error => console.error('Erro ao carregar o JSON:', error));
+                    // Obter informações necessárias do JSON
+                    const moduleName = getModuleNameFromFilename(reportFile.split('/').pop());
+                    const coveragePercentage = (parseFloat(data.coverage) * 100).toFixed(2);
+                    const totalTestUnit = targets[0]?.totalTest || 0;
+                    const totalTestUI = targets[1]?.totalTest || 0;
+                    const totalFailed = (targets[0]?.failedTest || 0) + (targets[1]?.failedTest || 0);
+
+                    // Preencher a tabela com os dados do JSON
+                    const row = table.insertRow();
+                    const cellValues = [moduleName, coveragePercentage + '%', totalTestUnit, totalTestUI, totalFailed];
+                    cellValues.forEach(value => {
+                        const cell = row.insertCell();
+                        cell.textContent = value;
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar o JSON:', error);
+                }
+            }
+
+            // Adicionar a tabela ao contêiner
+            tableContainer.appendChild(table);
+        }
+
+        // Chamar a função para carregar e processar os relatórios
+        loadAndProcessReports();
     </script>
 </body>
 
