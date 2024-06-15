@@ -57,7 +57,7 @@
 <body>
     <h1>Relatório de Cobertura de Testes</h1>
     <div id="table-container">
-        <!-- Tabela gerada dinamicamente a partir dos JSONs -->
+        <!-- Tabela gerada dinamicamente a partir do JSON -->
     </div>
     <script>
         // Função para extrair o nome do módulo a partir do nome do arquivo JSON
@@ -65,59 +65,61 @@
             return filename.replace('_report.json', '');
         }
 
-        // Função para carregar e processar todos os arquivos JSON na pasta Reports
-        async function loadAndProcessReports() {
-            const tableContainer = document.getElementById('table-container');
-
-            // Criar a tabela
-            const table = document.createElement('table');
-            const headerRow = table.insertRow();
-            ['Modulo', 'Coverage', 'Total test Unit', 'Total test UI', 'Total Failed'].forEach(headerText => {
-                const th = document.createElement('th');
-                th.textContent = headerText;
-                headerRow.appendChild(th);
-            });
-
-            // Obter lista de arquivos JSON na pasta Reports
-            const response = await fetch('Reports');
-            const text = await response.text();
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(text, 'text/html');
-            const reportFiles = Array.from(htmlDoc.getElementsByTagName('a'))
-                                    .map(a => a.href)
-                                    .filter(href => href.endsWith('_report.json'));
-
-            for (const reportFile of reportFiles) {
-                try {
-                    const response = await fetch(reportFile);
-                    const data = await response.json();
+        // Função para criar uma linha na tabela para um arquivo JSON
+        function createRowForReport(jsonFile) {
+            fetch(`Reports/${jsonFile}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableContainer = document.getElementById('table-container');
                     const targets = data.Targets;
 
                     // Obter informações necessárias do JSON
-                    const moduleName = getModuleNameFromFilename(reportFile.split('/').pop());
+                    const moduleName = getModuleNameFromFilename(jsonFile);
                     const coveragePercentage = (parseFloat(data.coverage) * 100).toFixed(2);
                     const totalTestUnit = targets[0]?.totalTest || 0;
                     const totalTestUI = targets[1]?.totalTest || 0;
                     const totalFailed = (targets[0]?.failedTest || 0) + (targets[1]?.failedTest || 0);
 
-                    // Preencher a tabela com os dados do JSON
+                    // Criar a tabela se não existir
+                    if (!tableContainer.querySelector('table')) {
+                        const table = document.createElement('table');
+                        tableContainer.appendChild(table);
+
+                        // Cabeçalho da tabela
+                        const headerRow = table.insertRow();
+                        ['Modulo', 'Coverage', 'Total test Unit', 'Total test UI', 'Total Failed'].forEach(headerText => {
+                            const th = document.createElement('th');
+                            th.textContent = headerText;
+                            headerRow.appendChild(th);
+                        });
+                    }
+
+                    // Adicionar uma nova linha à tabela para o arquivo JSON atual
+                    const table = tableContainer.querySelector('table');
                     const row = table.insertRow();
                     const cellValues = [moduleName, coveragePercentage + '%', totalTestUnit, totalTestUI, totalFailed];
                     cellValues.forEach(value => {
                         const cell = row.insertCell();
                         cell.textContent = value;
                     });
-                } catch (error) {
-                    console.error('Erro ao carregar o JSON:', error);
-                }
-            }
-
-            // Adicionar a tabela ao contêiner
-            tableContainer.appendChild(table);
+                })
+                .catch(error => console.error('Erro ao carregar o JSON:', error));
         }
 
-        // Chamar a função para carregar e processar os relatórios
-        loadAndProcessReports();
+        // Função para carregar e criar linhas para todos os arquivos JSON na pasta Reports
+        function loadReportsAndCreateRows() {
+            fetch('Reports/index.json')
+                .then(response => response.json())
+                .then(jsonFiles => {
+                    jsonFiles.forEach(jsonFile => {
+                        createRowForReport(jsonFile);
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar a lista de arquivos JSON:', error));
+        }
+
+        // Chamar a função para carregar e criar linhas para os relatórios JSON ao carregar a página
+        loadReportsAndCreateRows();
     </script>
 </body>
 
