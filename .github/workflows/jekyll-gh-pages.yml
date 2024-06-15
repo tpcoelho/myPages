@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run generate_index.js
-        run: node generate_index.js
+        run: node Scripts/generate_index.js
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
