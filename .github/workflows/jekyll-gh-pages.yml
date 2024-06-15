@@ -31,10 +31,6 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Copy JSON files to Reports directory
-        run: |
-          mkdir -p Reports
-          cp myPages/*.json Reports/
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
