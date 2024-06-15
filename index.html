@@ -108,7 +108,7 @@
 
         // Função para carregar e criar linhas para todos os arquivos JSON na pasta Reports
         function loadReportsAndCreateRows() {
-            fetch('Reports/index.json')
+            fetch('reportsFilesindex.json')
                 .then(response => response.json())
                 .then(jsonFiles => {
                     jsonFiles.forEach(jsonFile => {
