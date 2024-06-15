@@ -60,28 +60,39 @@
         <!-- Tabela gerada dinamicamente a partir do JSON -->
     </div>
     <script>
+        // Função para extrair o nome do módulo a partir do nome do arquivo JSON
+        function getModuleNameFromFilename(filename) {
+            return filename.replace('_report.json', '');
+        }
+
         fetch('Reports/moduloName_report.json')
             .then(response => response.json())
             .then(data => {
                 const tableContainer = document.getElementById('table-container');
                 const targets = data.Targets;
 
+                // Obter informações necessárias do JSON
+                const moduleName = getModuleNameFromFilename('moduloName_report.json'); // Substitua pelo nome real do arquivo JSON
+                const coveragePercentage = (parseFloat(data.coverage) * 100).toFixed(2);
+                const totalTestUnit = targets[0]?.totalTest || 0;
+                const totalTestUI = targets[1]?.totalTest || 0;
+                const totalFailed = (targets[0]?.failedTest || 0) + (targets[1]?.failedTest || 0);
+
                 // Criar a tabela
                 const table = document.createElement('table');
                 const headerRow = table.insertRow();
-                ['Nome do Target', 'Total de Testes', 'Testes Passados', 'Testes Falhados'].forEach(headerText => {
+                ['Modulo', 'Coverage', 'Total test Unit', 'Total test UI', 'Total Failed'].forEach(headerText => {
                     const th = document.createElement('th');
                     th.textContent = headerText;
                     headerRow.appendChild(th);
                 });
 
                 // Preencher a tabela com os dados do JSON
-                targets.forEach(target => {
-                    const row = table.insertRow();
-                    ['targetName', 'totalTest', 'passedTest', 'failedTest'].forEach(key => {
-                        const cell = row.insertCell();
-                        cell.textContent = target[key];
-                    });
+                const row = table.insertRow();
+                const cellValues = [moduleName, coveragePercentage + '%', totalTestUnit, totalTestUI, totalFailed];
+                cellValues.forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
                 });
 
                 // Adicionar a tabela ao contêiner
